@@ -1,0 +1,16 @@
+{
+  "name": "codershub",
+  "version": "1.0.0",
+  "description": "CodersHub - a personal hub for experiences, videos, journals, pictures and web finds",
+  "license": "UNLICENSED",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
