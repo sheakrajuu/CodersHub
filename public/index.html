@@ -22,7 +22,6 @@
   <nav class="tabs" id="mainTabs">
     <button class="tab active" data-tab="discover">Discover</button>
     <button class="tab" data-tab="videos">Videos</button>
-    <button class="tab" data-tab="playlists">Playlists</button>
     <button class="tab" data-tab="pictures">Pictures</button>
     <button class="tab" data-tab="blog">Notes</button>
     <button class="tab" data-tab="websites">Web finds</button>
@@ -51,7 +50,7 @@
       </div>
       <div class="hero-console" aria-label="CodersHub activity preview">
         <div class="console-top"><span></span><span></span><span></span><b>codershub.workspace</b></div>
-        <div class="console-body"><p><i>&gt;</i> workspace ready</p><p><i>&gt;</i> <strong>notes saved: local</strong></p><p><i>&gt;</i> next focus: <em>ship one thing</em></p><div class="console-cursor"></div></div>
+        <div class="console-body"><p><i>&gt;</i> workspace ready</p><p><i>&gt;</i> <strong>collection saved: server</strong></p><p><i>&gt;</i> next focus: <em>ship one thing</em></p><div class="console-cursor"></div></div>
       </div>
     </div>
     <div class="hub-stats" aria-label="Collection summary"><div><strong id="statVideos">0</strong><span>videos</span></div><div><strong id="statPictures">0</strong><span>visuals</span></div><div><strong id="statJournals">0</strong><span>notes</span></div><div><strong id="statLinks">0</strong><span>web finds</span></div></div>
@@ -78,21 +77,18 @@
   </section>
 
   <section class="panel" id="panel-videos">
-    <div class="section-heading">
-      <div><p class="eyebrow">Your collection</p><h2>Latest videos</h2></div>
-      <span class="section-note">Videos, pictures &amp; journals</span>
-    </div>
-    <div class="grid videos-grid" id="videosGrid"></div>
-    <p class="empty" id="videosEmpty">No videos yet. Embed one from the admin panel.</p>
-  </section>
-
-  <section class="panel" id="panel-playlists">
-    <div class="section-heading">
-      <div><p class="eyebrow">Curated learning paths</p><h2>Video playlists</h2></div>
-      <span class="section-note">Save a sequence for later</span>
+    <div class="section-heading playlist-section-heading">
+      <div><p class="eyebrow">Curated learning paths</p><h2>Playlists</h2></div>
+      <span class="section-note">Saved sequences for focused watching</span>
     </div>
     <div class="grid playlists-grid" id="playlistsGrid"></div>
     <p class="empty" id="playlistsEmpty">No playlists yet. Create one from the admin panel.</p>
+    <div class="section-heading">
+      <div><p class="eyebrow">Your collection</p><h2>Latest videos</h2></div>
+      <span class="section-note">Playlists and individual videos</span>
+    </div>
+    <div class="grid videos-grid" id="videosGrid"></div>
+    <p class="empty" id="videosEmpty">No videos yet. Embed one from the admin panel.</p>
   </section>
 
   <section class="panel" id="panel-blog">

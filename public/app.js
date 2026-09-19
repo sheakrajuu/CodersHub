@@ -3,7 +3,7 @@ const state = { content: { pictures: [], videos: [], blogs: [], links: [], manga
 // ---------- helpers ----------
 const $ = sel => document.querySelector(sel);
 const $$ = sel => document.querySelectorAll(sel);
-const validSections = ['discover', 'videos', 'playlists', 'pictures', 'blog', 'websites'];
+const validSections = ['discover', 'videos', 'pictures', 'blog', 'websites'];
 let activeSection = 'discover';
 const mobileMenuButton = $('#mobileMenuButton');
 let installPrompt = null;
@@ -14,6 +14,10 @@ function toast(msg){
   t.classList.add('show');
   clearTimeout(toast._t);
   toast._t = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+function lockPage(locked){
+  document.body.classList.toggle('view-locked', locked);
 }
 
 async function api(path, opts = {}){
@@ -27,7 +31,9 @@ async function api(path, opts = {}){
 
 // ---------- tabs (public) ----------
 function showSection(section, updateHistory = true){
+  if (section === 'playlists') section = 'videos';
   if (!validSections.includes(section)) section = 'discover';
+  lockPage(false);
   activeSection = section;
   $$('#mainTabs .tab').forEach(button => button.classList.toggle('active', button.dataset.tab === section));
   $$('.panel').forEach(panel => panel.classList.toggle('active', panel.id === `panel-${section}`));
@@ -259,6 +265,7 @@ function renderDetail(type, id){
   $$('#detailContent [data-playlist-video]').forEach(button => button.addEventListener('click', () => openDetail('video', button.dataset.playlistVideo)));
   $('#detailView').classList.add('show');
   $('#detailView').setAttribute('aria-hidden', 'false');
+  lockPage(true);
   document.title = `${item.title || item.caption || 'Picture'} | CodersHub`;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -310,6 +317,7 @@ function escAttr(s=''){ return esc(s).replace(/"/g,'&quot;'); }
 
 function closeDetail(){
   if ($('#detailView').classList.contains('show')) history.back();
+  else lockPage(false);
 }
 
 function renderSearchResults(query){
@@ -327,6 +335,7 @@ function renderSearchResults(query){
   $$('.search-result').forEach(result => result.addEventListener('click', () => {
     $('#searchOverlay').classList.remove('show');
     if (result.dataset.type === 'link') {
+      lockPage(false);
       showSection('websites');
       return;
     }
@@ -334,9 +343,9 @@ function renderSearchResults(query){
   }));
 }
 
-$('#searchButton').addEventListener('click', () => { $('#searchOverlay').classList.add('show'); $('#searchInput').focus(); });
-$('#searchClose').addEventListener('click', () => $('#searchOverlay').classList.remove('show'));
-$('#searchOverlay').addEventListener('click', event => { if (event.target.id === 'searchOverlay') $('#searchOverlay').classList.remove('show'); });
+$('#searchButton').addEventListener('click', () => { $('#searchOverlay').classList.add('show'); lockPage(true); $('#searchInput').focus(); });
+$('#searchClose').addEventListener('click', () => { $('#searchOverlay').classList.remove('show'); lockPage(false); });
+$('#searchOverlay').addEventListener('click', event => { if (event.target.id === 'searchOverlay') { $('#searchOverlay').classList.remove('show'); lockPage(false); } });
 $('#searchInput').addEventListener('input', event => renderSearchResults(event.target.value));
 $('#detailBack').addEventListener('click', closeDetail);
 window.addEventListener('popstate', event => {
@@ -347,11 +356,13 @@ window.addEventListener('popstate', event => {
   } else {
     $('#detailView').classList.remove('show');
     $('#detailView').setAttribute('aria-hidden', 'true');
+    lockPage(false);
     showSection(view.section || 'discover', false);
   }
 });
 
-const initialSection = (location.hash.slice(1).split('/')[0] || 'discover');
+const requestedInitialSection = location.hash.slice(1).split('/')[0] || 'discover';
+const initialSection = requestedInitialSection === 'playlists' ? 'videos' : requestedInitialSection;
 history.replaceState({ section: validSections.includes(initialSection) ? initialSection : 'discover' }, '', location.hash || '#discover');
 showSection(validSections.includes(initialSection) ? initialSection : 'discover', false);
 
@@ -391,14 +402,16 @@ async function submitLogin(){
 
 function openAdmin(){
   $('#adminOverlay').classList.add('show');
+  lockPage(true);
   renderAdminLists();
 }
-$('#adminClose').addEventListener('click', ()=> $('#adminOverlay').classList.remove('show'));
+$('#adminClose').addEventListener('click', ()=> { $('#adminOverlay').classList.remove('show'); lockPage(false); });
 $('#logoutBtn').addEventListener('click', async ()=>{
   try{ await api('/api/admin/logout', { method:'POST' }); }catch(e){}
   state.adminToken = null;
   sessionStorage.removeItem('codershubToken');
   $('#adminOverlay').classList.remove('show');
+  lockPage(false);
 });
 
 // ---------- admin tabs ----------

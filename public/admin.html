@@ -44,11 +44,6 @@
         <button class="atab" data-atab="a-security">Security</button>
       </div>
 
-      <section class="admin-needs" aria-labelledby="needsTitle">
-        <p class="eyebrow" id="needsTitle">What CodersHub needs</p>
-        <ul><li><strong>Videos</strong><span>Lessons, talks, demos, and inspiration.</span></li><li><strong>Pictures</strong><span>Visual references and moments worth saving.</span></li><li><strong>Notes</strong><span>Your experiences, ideas, and progress.</span></li><li><strong>Web finds</strong><span>Useful sites and links you want to revisit.</span></li></ul>
-      </section>
-
       <div class="apanel active" id="a-videos">
         <label>Video URL or embed code</label>
         <input type="text" id="videoUrlInput" placeholder="https://vimeo.com/... or https://youtube.com/watch?v=..." />
@@ -58,11 +53,14 @@
         <div class="admin-list" id="adminVideoList"></div>
       </div>
       <div class="apanel" id="a-playlists">
-        <p class="muted">Group saved videos into focused collections. The order below becomes the playback order.</p>
+        <p class="muted">Paste multiple video URLs or iframe embed codes, one per line. They will be saved in this order.</p>
         <label>Playlist title</label>
         <input type="text" id="playlistTitleInput" placeholder="JavaScript fundamentals" />
         <label>Description (optional)</label>
         <textarea id="playlistDescriptionInput" rows="3" placeholder="What this playlist is for"></textarea>
+        <label for="playlistSourcesInput">Video URLs or embed codes</label>
+        <textarea id="playlistSourcesInput" rows="7" placeholder="https://www.youtube.com/watch?v=...&#10;https://vimeo.com/...&#10;&lt;iframe src=\"...\"&gt;&lt;/iframe&gt;"></textarea>
+        <p class="field-hint">Use one source per line. Commas and semicolons also work.</p>
         <label>Choose videos</label>
         <div class="playlist-video-picker" id="playlistVideoPicker"></div>
         <button class="btn primary" id="addPlaylistBtn">Create playlist</button>

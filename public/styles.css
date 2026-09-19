@@ -178,6 +178,65 @@ body.journal-page,body.admin-page{min-height:100vh;display:flex;flex-direction:c
 
 /* Installed workspace controls */
 [hidden]{display:none!important}
+
+/* Mobile workspace safeguards */
+.field-hint{margin:6px 0 16px;color:var(--muted);font-size:.78rem;line-height:1.4}
+.admin-row .rt{min-width:0;overflow-wrap:anywhere}
+.admin-row .row-actions{flex:0 0 auto}
+@media (max-width:720px){
+  .topbar{flex-wrap:wrap;gap:10px;padding:12px 16px}
+  .brand{margin-right:auto}
+  .search-button{order:2}
+  .mobile-menu-button{order:3}
+  .tabs.mobile-open{order:4;flex-basis:100%}
+  #app{padding-left:16px;padding-right:16px;padding-bottom:60px}
+  .discover-intro{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}
+  .section-heading{align-items:flex-start;flex-direction:column;gap:14px}
+  .section-heading .section-note{align-self:flex-start}
+  .grid,.discover-grid{grid-template-columns:1fr;gap:14px}
+  .videos-grid{grid-template-columns:1fr}
+  .frame-wrap{min-height:0}
+  .site-footer{padding-left:0;padding-right:0}
+  .admin-page .admin-window-head{flex-direction:column;align-items:stretch}
+  .admin-page .admin-window-head>div{min-width:0}
+  .admin-page .admin-tabs{grid-template-columns:repeat(2,minmax(0,1fr));position:static}
+  .admin-page .apanel{padding-bottom:24px}
+  .admin-page input,.admin-page textarea,.admin-page select{max-width:100%;font-size:16px}
+  .admin-page .admin-row{align-items:flex-start;gap:10px}
+  .admin-page .admin-row .row-actions{margin-left:auto}
+  .playlist-video-picker{max-height:45vh;overflow:auto;padding-right:2px}
+  .playlist-video-option{min-height:48px;touch-action:pan-y}
+  .backup-actions{display:grid;grid-template-columns:1fr}
+  .backup-actions .btn{width:100%}
+  .detail-shell{padding-left:16px;padding-right:16px}
+  .detail-video iframe,.detail-video video{max-height:56vw}
+}
+@media (max-width:420px){
+  .admin-page .admin-tabs{grid-template-columns:1fr}
+  .admin-page .admin-row{flex-direction:column}
+  .admin-page .admin-row .row-actions{width:100%;margin-left:0}
+  .admin-page .admin-row .row-actions button{flex:1}
+  .playlist-detail-item{align-items:flex-start;gap:10px}
+  .playlist-detail-item h2{font-size:.95rem;overflow-wrap:anywhere}
+}
+
+/* Full-page and narrow-screen corrections */
+.admin-window{max-width:1180px}
+.playlist-section-heading{padding-top:34px}
+.playlist-section-heading + .playlists-grid{padding-top:20px}
+.playlist-section-heading + .playlists-grid + .empty + .section-heading{padding-top:58px}
+.admin-page .apanel{max-width:900px}
+.admin-row .rt{min-width:0;overflow-wrap:anywhere;white-space:normal}
+.playlist-video-option>span:last-child{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+.playlist-video-option{min-width:0}
+body.view-locked{overflow:hidden;overscroll-behavior:none}
+.detail-view,.search-overlay,.overlay{overscroll-behavior:contain}
+@media (max-width:720px){
+  .admin-window{max-width:none}
+  .admin-page .apanel{max-width:none}
+  .admin-row{min-width:0}
+  .admin-row .row-actions{flex:0 0 auto}
+}
 .install-button{display:flex;align-items:center;gap:7px;padding:8px 12px;background:var(--ink);border:2px solid var(--ink);border-radius:999px;color:#fff;font:600 .72rem 'DM Mono',monospace;white-space:nowrap;box-shadow:2px 2px 0 var(--accent)}
 .install-button:hover{background:var(--accent);color:#fff}
 @media (max-width:720px){.install-button{order:2;padding:8px 10px;font-size:.65rem}.search-button{order:3}.mobile-menu-button{order:1}.brand{order:0}.topbar{gap:8px}}

@@ -209,11 +209,17 @@ $('#addVideoBtn').addEventListener('click', async () => {
 
 $('#addPlaylistBtn').addEventListener('click', async () => {
   adminError('');
+  const sources = $('#playlistSourcesInput').value.trim();
   const videoIds = [...$('#playlistVideoPicker').querySelectorAll('input:checked')].map(input => input.value);
+  if (!sources && !videoIds.length) {
+    adminError('Add at least one video URL, embed code, or saved video.');
+    return;
+  }
   try {
-    await api('/api/admin/playlists', { method: 'POST', body: JSON.stringify({ title: $('#playlistTitleInput').value, description: $('#playlistDescriptionInput').value, videoIds }) });
+    await api('/api/admin/playlists', { method: 'POST', body: JSON.stringify({ title: $('#playlistTitleInput').value, description: $('#playlistDescriptionInput').value, videoIds, sources }) });
     $('#playlistTitleInput').value = '';
     $('#playlistDescriptionInput').value = '';
+    $('#playlistSourcesInput').value = '';
     toast('Playlist created');
     await loadContent();
   } catch (error) { adminError(error.message); }
