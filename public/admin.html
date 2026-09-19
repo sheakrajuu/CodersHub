@@ -36,6 +36,7 @@
       </div>
       <div class="admin-tabs" id="adminTabs">
         <button class="atab active" data-atab="a-videos">Videos</button>
+        <button class="atab" data-atab="a-playlists">Playlists</button>
         <button class="atab" data-atab="a-pictures">Pictures</button>
         <button class="atab" data-atab="a-blog">Notes</button>
         <button class="atab" data-atab="a-links">Web finds</button>
@@ -55,6 +56,17 @@
         <input type="text" id="videoTitleInput" placeholder="Title" />
         <button class="btn primary" id="addVideoBtn">Add video</button>
         <div class="admin-list" id="adminVideoList"></div>
+      </div>
+      <div class="apanel" id="a-playlists">
+        <p class="muted">Group saved videos into focused collections. The order below becomes the playback order.</p>
+        <label>Playlist title</label>
+        <input type="text" id="playlistTitleInput" placeholder="JavaScript fundamentals" />
+        <label>Description (optional)</label>
+        <textarea id="playlistDescriptionInput" rows="3" placeholder="What this playlist is for"></textarea>
+        <label>Choose videos</label>
+        <div class="playlist-video-picker" id="playlistVideoPicker"></div>
+        <button class="btn primary" id="addPlaylistBtn">Create playlist</button>
+        <div class="admin-list" id="adminPlaylistList"></div>
       </div>
       <div class="apanel" id="a-pictures">
         <label>Image URL(s)</label>
@@ -117,6 +129,11 @@
         <label for="confirmPasswordInput">Confirm new password</label>
         <input type="password" id="confirmPasswordInput" autocomplete="new-password" minlength="12" />
         <button class="btn primary" id="changePasswordBtn">Update password</button>
+        <hr>
+        <h2>Content backup</h2>
+        <p class="muted">Download a copy of your collection or restore a previous JSON export.</p>
+        <div class="backup-actions"><button class="btn ghost" id="exportContentBtn" type="button">Download backup</button><button class="btn ghost" id="importContentBtn" type="button">Restore backup</button></div>
+        <input type="file" id="importContentInput" accept="application/json" hidden>
       </div>
       <p class="error" id="adminError"></p>
     </section>

@@ -22,6 +22,7 @@
   <nav class="tabs" id="mainTabs">
     <button class="tab active" data-tab="discover">Discover</button>
     <button class="tab" data-tab="videos">Videos</button>
+    <button class="tab" data-tab="playlists">Playlists</button>
     <button class="tab" data-tab="pictures">Pictures</button>
     <button class="tab" data-tab="blog">Notes</button>
     <button class="tab" data-tab="websites">Web finds</button>
@@ -83,6 +84,15 @@
     </div>
     <div class="grid videos-grid" id="videosGrid"></div>
     <p class="empty" id="videosEmpty">No videos yet. Embed one from the admin panel.</p>
+  </section>
+
+  <section class="panel" id="panel-playlists">
+    <div class="section-heading">
+      <div><p class="eyebrow">Curated learning paths</p><h2>Video playlists</h2></div>
+      <span class="section-note">Save a sequence for later</span>
+    </div>
+    <div class="grid playlists-grid" id="playlistsGrid"></div>
+    <p class="empty" id="playlistsEmpty">No playlists yet. Create one from the admin panel.</p>
   </section>
 
   <section class="panel" id="panel-blog">
@@ -156,6 +166,7 @@
     <div class="admin-head">
       <h2>Collection manager</h2>
       <div>
+        <a class="btn ghost small" href="/admin.html" target="_blank" rel="noopener">Full manager</a>
         <button class="btn ghost small" id="logoutBtn">Log out</button>
         <button class="reader-close" id="adminClose">&times;</button>
       </div>

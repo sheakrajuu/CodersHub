@@ -1,9 +1,9 @@
-const state = { content: { pictures: [], videos: [], blogs: [], links: [], mangas: [] }, adminToken: sessionStorage.getItem('codershubToken') || null };
+const state = { content: { pictures: [], videos: [], blogs: [], links: [], mangas: [], playlists: [] }, adminToken: sessionStorage.getItem('codershubToken') || null };
 
 // ---------- helpers ----------
 const $ = sel => document.querySelector(sel);
 const $$ = sel => document.querySelectorAll(sel);
-const validSections = ['discover', 'videos', 'pictures', 'blog', 'websites'];
+const validSections = ['discover', 'videos', 'playlists', 'pictures', 'blog', 'websites'];
 let activeSection = 'discover';
 const mobileMenuButton = $('#mobileMenuButton');
 let installPrompt = null;
@@ -80,6 +80,7 @@ async function loadContent(){
   renderDiscover();
   renderPictures();
   renderVideos();
+  renderPlaylists();
   renderBlog();
   renderLinks();
   if (state.adminToken) renderAdminLists();
@@ -167,6 +168,19 @@ function renderVideos(){
   }));
 }
 
+function renderPlaylists(){
+  const grid = $('#playlistsGrid');
+  const playlists = state.content.playlists || [];
+  grid.innerHTML = playlists.map(playlist => {
+    const videos = playlist.videoIds.map(id => state.content.videos.find(video => video.id === id)).filter(Boolean);
+    return `<article class="playlist-card" data-id="${escAttr(playlist.id)}"><div class="playlist-card-head"><span class="eyebrow">${videos.length} videos</span><h3>${esc(playlist.title)}</h3>${playlist.description ? `<p>${esc(playlist.description)}</p>` : ''}</div><div class="playlist-items">${videos.slice(0, 3).map((video, index) => `<span><b>${index + 1}</b>${esc(video.title || 'Untitled video')}</span>`).join('')}</div><button class="btn ghost small playlist-open" type="button">Open playlist</button></article>`;
+  }).join('');
+  $('#playlistsEmpty').classList.toggle('show', playlists.length === 0);
+  grid.querySelectorAll('.playlist-card').forEach(card => card.addEventListener('click', event => {
+    if (event.target.closest('.playlist-open') || event.currentTarget === card) openDetail('playlist', card.dataset.id);
+  }));
+}
+
 function renderBlog(){
   const list = $('#blogList');
   const posts = state.content.blogs;
@@ -225,18 +239,24 @@ function renderDetail(type, id){
     ? state.content.pictures.find(entry => entry.id === id)
     : type === 'video'
       ? state.content.videos.find(entry => entry.id === id)
-      : state.content.blogs.find(entry => entry.id === id);
+      : type === 'playlist'
+        ? (state.content.playlists || []).find(entry => entry.id === id)
+        : state.content.blogs.find(entry => entry.id === id);
   if (!item) return;
   const detailContent = $('#detailContent');
   if (type === 'picture') {
     detailContent.innerHTML = `<p class="eyebrow">Picture collection</p><h1>${esc(item.caption || 'Untitled picture')}</h1>${interactionBar(type, id)}<div class="detail-gallery picture-gallery">${pictureUrls(item).map(url => `<img src="${escAttr(url)}" alt="${escAttr(item.caption || '')}" loading="lazy">`).join('')}</div>`;
   } else if (type === 'video') {
     detailContent.innerHTML = `<div class="watch-layout"><div class="watch-main"><p class="eyebrow">Video</p><div class="detail-media detail-video">${videoMarkup(item)}</div><h1>${esc(item.title || 'Untitled video')}</h1>${interactionBar(type, id)}</div>${recommendationMarkup(id)}</div>`;
+  } else if (type === 'playlist') {
+    const videos = item.videoIds.map(videoId => state.content.videos.find(video => video.id === videoId)).filter(Boolean);
+    detailContent.innerHTML = `<p class="eyebrow">Video playlist</p><h1>${esc(item.title)}</h1>${item.description ? `<p class="detail-lede">${esc(item.description)}</p>` : ''}<div class="playlist-detail-list">${videos.map((video, index) => `<article class="playlist-detail-item"><span class="playlist-number">${index + 1}</span><div><h2>${esc(video.title || 'Untitled video')}</h2><button class="btn ghost small" data-playlist-video="${escAttr(video.id)}" type="button">Watch video</button></div></article>`).join('')}</div>`;
   } else {
     detailContent.innerHTML = `<p class="eyebrow">Journal</p><h1>${esc(item.title)}</h1><p class="detail-date">${new Date(item.addedAt).toLocaleDateString()}</p>${interactionBar(type, id)}${item.images?.length ? `<div class="detail-gallery">${item.images.map(url => `<img src="${escAttr(url)}" alt="" loading="lazy">`).join('')}</div>` : ''}<div class="detail-body">${esc(item.body || '')}</div>`;
   }
   $$('#detailContent [data-action]').forEach(button => button.addEventListener('click', handleDetailAction));
   $$('#detailContent [data-recommendation-id]').forEach(button => button.addEventListener('click', () => openDetail('video', button.dataset.recommendationId)));
+  $$('#detailContent [data-playlist-video]').forEach(button => button.addEventListener('click', () => openDetail('video', button.dataset.playlistVideo)));
   $('#detailView').classList.add('show');
   $('#detailView').setAttribute('aria-hidden', 'false');
   document.title = `${item.title || item.caption || 'Picture'} | CodersHub`;
@@ -297,6 +317,7 @@ function renderSearchResults(query){
   const results = [
     ...state.content.pictures.map(item => ({ ...item, type: 'picture', label: item.caption || 'Untitled picture', text: `${item.caption} ${item.url}` })),
     ...state.content.videos.map(item => ({ ...item, type: 'video', label: item.title || 'Untitled video', text: `${item.title} ${item.embed}` })),
+    ...(state.content.playlists || []).map(item => ({ ...item, type: 'playlist', label: item.title, text: `${item.title} ${item.description}` })),
     ...state.content.blogs.map(item => ({ ...item, type: 'journal', label: item.title, text: `${item.title} ${item.body}` })),
     ...(state.content.links || []).map(item => ({ ...item, type: 'link', label: item.title || item.url, text: `${item.title} ${item.url} ${item.description}` }))
   ].filter(item => !normalized || item.text.toLowerCase().includes(normalized)).slice(0, 30);

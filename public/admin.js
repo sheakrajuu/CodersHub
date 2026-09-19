@@ -1,5 +1,5 @@
 const state = {
-  content: { pictures: [], videos: [], blogs: [], links: [], mangas: [] },
+  content: { pictures: [], videos: [], blogs: [], links: [], mangas: [], playlists: [] },
   adminToken: sessionStorage.getItem('codershubToken') || null
 };
 
@@ -54,14 +54,64 @@ async function loadContent(){
 function renderAdminLists(){
   const content = state.content;
   $('#adminVideoList').innerHTML = content.videos.map(item => rowHtml(item.id, item.title || item.embed, 'videos')).join('');
+  $('#adminPlaylistList').innerHTML = (content.playlists || []).map(item => rowHtml(item.id, `${item.title} (${item.videoIds.length} videos)`, 'playlists')).join('');
   $('#adminPictureList').innerHTML = content.pictures.map(item => rowHtml(item.id, item.caption || item.url, 'pictures')).join('');
   $('#adminBlogList').innerHTML = content.blogs.map(item => rowHtml(item.id, item.title, 'blogs')).join('');
   $('#adminLinkList').innerHTML = (content.links || []).map(item => rowHtml(item.id, item.title || item.url, 'links')).join('');
-  $$('.admin-row button').forEach(button => button.addEventListener('click', removeItem));
+  $('#playlistVideoPicker').innerHTML = content.videos.length
+    ? content.videos.map(item => `<label class="playlist-video-option" draggable="true" data-video-id="${item.id}"><span class="drag-handle" aria-hidden="true">&#8597;</span><input type="checkbox" value="${item.id}"><span>${escapeHtml(item.title || item.embed)}</span></label>`).join('')
+    : '<p class="muted">Add videos first, then they will appear here.</p>';
+  let draggedOption = null;
+  $$('#playlistVideoPicker .playlist-video-option').forEach(option => {
+    option.addEventListener('dragstart', () => { draggedOption = option; option.classList.add('dragging'); });
+    option.addEventListener('dragend', () => { draggedOption = null; option.classList.remove('dragging'); });
+    option.addEventListener('dragover', event => {
+      event.preventDefault();
+      if (draggedOption && draggedOption !== option) option.parentElement.insertBefore(draggedOption, option);
+    });
+  });
+  $$('.admin-row [data-action="delete"]').forEach(button => button.addEventListener('click', removeItem));
+  $$('.admin-row [data-action="edit"]').forEach(button => button.addEventListener('click', editItem));
 }
 
 function rowHtml(id, label, type){
-  return `<div class="admin-row"><span class="rt">${escapeHtml(label)}</span><button data-id="${id}" data-type="${type}" type="button">Delete</button></div>`;
+  return `<div class="admin-row"><span class="rt">${escapeHtml(label)}</span><span class="row-actions"><button data-id="${id}" data-type="${type}" data-action="edit" type="button">Edit</button><button data-id="${id}" data-type="${type}" data-action="delete" type="button">Delete</button></span></div>`;
+}
+
+async function editItem(event){
+  const button = event.currentTarget;
+  if (button.dataset.type === 'playlists') return editPlaylist(event);
+  const item = state.content[button.dataset.type].find(entry => entry.id === button.dataset.id);
+  if (!item) return;
+  const updates = button.dataset.type === 'videos'
+    ? { title: window.prompt('Video title', item.title || ''), embed: window.prompt('Video URL or embed URL', item.embed || '') }
+    : button.dataset.type === 'pictures'
+      ? { caption: window.prompt('Picture caption', item.caption || '') }
+      : button.dataset.type === 'blogs'
+        ? { title: window.prompt('Note title', item.title || ''), body: window.prompt('Note body', item.body || '') }
+        : { title: window.prompt('Website title', item.title || ''), url: window.prompt('Website URL', item.url || ''), description: window.prompt('Website description', item.description || '') };
+  if (Object.values(updates).some(value => value === null)) return;
+  try {
+    await api(`/api/admin/${button.dataset.type}/${button.dataset.id}`, { method: 'PATCH', body: JSON.stringify(updates) });
+    toast('Saved changes');
+    await loadContent();
+  } catch (error) { adminError(error.message); }
+}
+
+async function editPlaylist(event){
+  const playlist = state.content.playlists.find(item => item.id === event.currentTarget.dataset.id);
+  if (!playlist) return;
+  const title = window.prompt('Playlist title', playlist.title);
+  if (title === null) return;
+  const description = window.prompt('Playlist description', playlist.description || '');
+  if (description === null) return;
+  const videoIds = window.prompt('Video IDs in order, separated by commas', playlist.videoIds.join(', '));
+  if (videoIds === null) return;
+  try {
+    await api(`/api/admin/playlists/${playlist.id}`, { method: 'PATCH', body: JSON.stringify({ title, description, videoIds: videoIds.split(',').map(value => value.trim()).filter(Boolean) }) });
+    toast('Playlist updated');
+    await loadContent();
+  } catch (error) { adminError(error.message); }
 }
 
 async function removeItem(event){
@@ -113,6 +163,34 @@ $('#changePasswordBtn').addEventListener('click', async () => {
   } catch (error) { adminError(error.message); }
 });
 
+$('#exportContentBtn').addEventListener('click', async () => {
+  try {
+    const response = await fetch('/api/admin/export', { headers: { 'x-admin-token': state.adminToken } });
+    if (!response.ok) throw new Error('Could not create a backup.');
+    const blob = await response.blob();
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'codershub-content.json';
+    link.click();
+    URL.revokeObjectURL(link.href);
+    toast('Backup downloaded');
+  } catch (error) { adminError(error.message); }
+});
+
+$('#importContentBtn').addEventListener('click', () => $('#importContentInput').click());
+$('#importContentInput').addEventListener('change', async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!window.confirm('Restore this backup and replace the current collection?')) return;
+  try {
+    const imported = JSON.parse(await file.text());
+    await api('/api/admin/import', { method: 'POST', body: JSON.stringify(imported) });
+    toast('Backup restored');
+    await loadContent();
+  } catch (error) { adminError(error.message); }
+  event.target.value = '';
+});
+
 $$('#adminTabs .atab').forEach(button => button.addEventListener('click', () => {
   $$('#adminTabs .atab').forEach(tab => tab.classList.remove('active'));
   button.classList.add('active');
@@ -127,6 +205,18 @@ $('#addVideoBtn').addEventListener('click', async () => {
     $('#videoUrlInput').value = ''; $('#videoTitleInput').value = '';
     toast('Video added'); await loadContent();
   }catch(error){ adminError(error.message); }
+});
+
+$('#addPlaylistBtn').addEventListener('click', async () => {
+  adminError('');
+  const videoIds = [...$('#playlistVideoPicker').querySelectorAll('input:checked')].map(input => input.value);
+  try {
+    await api('/api/admin/playlists', { method: 'POST', body: JSON.stringify({ title: $('#playlistTitleInput').value, description: $('#playlistDescriptionInput').value, videoIds }) });
+    $('#playlistTitleInput').value = '';
+    $('#playlistDescriptionInput').value = '';
+    toast('Playlist created');
+    await loadContent();
+  } catch (error) { adminError(error.message); }
 });
 
 $('#addPicturesBtn').addEventListener('click', async () => {
