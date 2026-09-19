@@ -183,6 +183,15 @@ function toEmbed(url) {
   return url;
 }
 
+function splitVideoSources(value) {
+  if (Array.isArray(value)) return value.map(source => String(source).trim()).filter(Boolean);
+  return String(value || '')
+    .split(/\s*(?:\r?\n|;)+\s*/)
+    .flatMap(source => /<iframe\b/i.test(source) ? [source] : source.split(','))
+    .map(source => source.trim())
+    .filter(Boolean);
+}
+
 // ---------- pictures ----------
 app.post('/api/admin/pictures', requireAdmin, (req, res) => {
   const { urls, caption } = req.body || {};
@@ -266,10 +275,18 @@ app.patch('/api/admin/:collection/:id', requireAdmin, (req, res) => {
 });
 
 app.post('/api/admin/playlists', requireAdmin, (req, res) => {
-  const { title, description, videoIds } = req.body || {};
+  const { title, description, videoIds, sources } = req.body || {};
   if (!title || !String(title).trim()) return res.status(400).json({ error: 'A playlist needs a title.' });
   const data = loadData();
-  const normalizedVideoIds = normalizeVideoIds(videoIds, data);
+  let normalizedVideoIds = normalizeVideoIds(videoIds, data);
+  if (sources !== undefined) {
+    const videoSources = splitVideoSources(sources);
+    if (!videoSources.length) return res.status(400).json({ error: 'Add at least one video URL or embed code.' });
+    const newVideos = videoSources.map(source => ({ id: id(), embed: toEmbed(source), title: '', addedAt: Date.now() }));
+    const orderedVideoIds = newVideos.map(video => video.id);
+    data.videos.unshift(...[...newVideos].reverse());
+    normalizedVideoIds = [...orderedVideoIds, ...(normalizedVideoIds || [])];
+  }
   if (!normalizedVideoIds || !normalizedVideoIds.length) return res.status(400).json({ error: 'Choose at least one video.' });
   const playlist = {
     id: id(),
