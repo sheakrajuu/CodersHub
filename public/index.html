@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CodersHub | Your corner of the web</title>
+<link rel="icon" href="/icons/codershub.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/codershub.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img class="brand-mark" src="/icons/codershub.svg" width="28" height="28" alt="">
+    <span class="brand-name">CodersHub</span>
+  </div>
+  <nav class="tabs" id="mainTabs">
+    <button class="tab active" data-tab="discover">Discover</button>
+    <button class="tab" data-tab="videos">Videos</button>
+    <button class="tab" data-tab="pictures">Pictures</button>
+    <button class="tab" data-tab="blog">Notes</button>
+    <button class="tab" data-tab="websites">Web finds</button>
+  </nav>
+  <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <button class="search-button" id="searchButton" title="Search" aria-label="Search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+  <button class="admin-entry admin-entry-top" id="adminEntryTop" title="Collection manager" aria-label="Collection manager">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 15a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V19.6a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H4.4a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H10.3a1.65 1.65 0 001-1.51V4.4a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.02a1.65 1.65 0 001.51 1h.09a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.4"/></svg>
+  </button>
+</header>
+
+<main id="app">
+
+  <section class="panel active" id="panel-discover">
+    <div class="discover-intro">
+      <div class="hero-copy">
+        <p class="eyebrow">Welcome to your personal internet</p>
+        <h1>Make. Explore.<br><em>Keep learning.</em></h1>
+        <p>Experiences, web finds, videos, and notes for the curious mind.</p>
+        <div class="hero-actions"><button class="btn primary" data-discover-tab="videos">Explore the hub <span aria-hidden="true">&#8594;</span></button><button class="btn hero-link" data-discover-tab="blog">Read the notes</button></div>
+      </div>
+      <div class="hero-console" aria-label="CodersHub activity preview">
+        <div class="console-top"><span></span><span></span><span></span><b>codershub.log</b></div>
+        <div class="console-body"><p><i>&gt;</i> loading curiosity...</p><p><i>&gt;</i> <strong>ideas found: 0042</strong></p><p><i>&gt;</i> next quest: <em>build something</em></p><div class="console-cursor"></div></div>
+      </div>
+    </div>
+    <div class="hub-stats" aria-label="Collection summary"><div><strong id="statVideos">0</strong><span>videos</span></div><div><strong id="statPictures">0</strong><span>visuals</span></div><div><strong id="statJournals">0</strong><span>notes</span></div><div><strong id="statLinks">0</strong><span>web finds</span></div></div>
+    <section class="discover-shelf">
+      <div class="section-heading"><div><p class="eyebrow">Your next quest</p><h2>Watch &amp; learn</h2></div><button class="shelf-link" data-discover-tab="videos">See all &#8594;</button></div>
+      <div class="discover-grid" id="discoverVideosGrid"></div>
+      <p class="empty" id="discoverVideosEmpty">No videos yet.</p>
+    </section>
+    <section class="discover-shelf">
+      <div class="section-heading"><div><p class="eyebrow">Visual bookmarks</p><h2>Things worth seeing</h2></div><button class="shelf-link" data-discover-tab="pictures">See all &#8594;</button></div>
+      <div class="discover-grid" id="discoverPicturesGrid"></div>
+      <p class="empty" id="discoverPicturesEmpty">No pictures yet.</p>
+    </section>
+    <section class="discover-shelf">
+      <div class="section-heading"><div><p class="eyebrow">From the notebook</p><h2>Notes &amp; stories</h2></div><button class="shelf-link" data-discover-tab="blog">See all &#8594;</button></div>
+      <div class="discover-grid" id="discoverJournalsGrid"></div>
+      <p class="empty" id="discoverJournalsEmpty">No journals yet.</p>
+    </section>
+  </section>
+
+  <section class="panel" id="panel-pictures">
+    <div class="grid" id="picturesGrid"></div>
+    <p class="empty" id="picturesEmpty">No pictures yet. Add some from the admin panel.</p>
+  </section>
+
+  <section class="panel" id="panel-videos">
+    <div class="section-heading">
+      <div><p class="eyebrow">Your collection</p><h2>Latest videos</h2></div>
+      <span class="section-note">Videos, pictures &amp; journals</span>
+    </div>
+    <div class="grid videos-grid" id="videosGrid"></div>
+    <p class="empty" id="videosEmpty">No videos yet. Embed one from the admin panel.</p>
+  </section>
+
+  <section class="panel" id="panel-blog">
+    <div class="blog-list" id="blogList"></div>
+    <p class="empty" id="blogEmpty">No posts yet.</p>
+  </section>
+
+  <section class="panel" id="panel-websites">
+    <div class="section-heading websites-heading">
+      <div><p class="eyebrow">Worth a visit</p><h2>Websites to visit</h2></div>
+    </div>
+    <div class="links-list" id="linksList"></div>
+    <p class="empty" id="linksEmpty">No websites yet.</p>
+  </section>
+
+  <footer class="site-footer">
+    <strong>CodersHub</strong>
+    <nav><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><button class="admin-entry" id="adminEntryBtn" title="Manage CodersHub" aria-label="Manage CodersHub">Manage hub</button></nav>
+  </footer>
+
+<div class="detail-view" id="detailView" aria-hidden="true">
+  <div class="detail-shell">
+    <button class="detail-back" id="detailBack" type="button">&#8592; Back</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<div class="search-overlay" id="searchOverlay" aria-hidden="true">
+  <div class="search-panel">
+    <button class="search-close" id="searchClose" type="button" aria-label="Close search">&times;</button>
+    <p class="eyebrow">Find something</p>
+    <h2>Search CodersHub</h2>
+    <input id="searchInput" type="search" placeholder="Search pictures, videos, journals and websites" autocomplete="off" />
+    <div class="search-results" id="searchResults"><p class="muted">Start typing to search the collection.</p></div>
+  </div>
+</div>
+
+<!-- lightbox for pictures -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose">&times;</button>
+  <img id="lightboxImg" src="" alt="">
+  <p id="lightboxCaption"></p>
+</div>
+
+<!-- blog post reader -->
+<div class="reader" id="reader">
+  <div class="reader-card">
+    <button class="reader-close" id="readerClose">&times;</button>
+    <h2 id="readerTitle"></h2>
+    <div class="reader-body" id="readerBody"></div>
+  </div>
+</div>
+
+<!-- admin login -->
+<div class="overlay" id="loginOverlay">
+  <div class="modal">
+    <h2>Admin sign in</h2>
+    <p class="muted">Enter the admin password to manage CodersHub.</p>
+    <input type="password" id="loginPassword" placeholder="Password" />
+    <p class="error" id="loginError"></p>
+    <div class="modal-actions">
+      <button class="btn ghost" id="loginCancel">Cancel</button>
+      <button class="btn primary" id="loginSubmit">Sign in</button>
+    </div>
+  </div>
+</div>
+
+<!-- admin panel -->
+<div class="overlay" id="adminOverlay">
+  <div class="modal admin-modal">
+    <div class="admin-head">
+      <h2>Collection manager</h2>
+      <div>
+        <button class="btn ghost small" id="logoutBtn">Log out</button>
+        <button class="reader-close" id="adminClose">&times;</button>
+      </div>
+    </div>
+
+    <div class="admin-tabs" id="adminTabs">
+      <button class="atab active" data-atab="a-videos">Embed video</button>
+      <button class="atab" data-atab="a-pictures">Add pictures</button>
+      <button class="atab" data-atab="a-blog">Write journal</button>
+      <button class="atab" data-atab="a-links">Add website</button>
+    </div>
+
+    <p class="admin-note">Only you can see this manager. Visitors see the collection, never these controls.</p>
+
+    <div class="apanel active" id="a-videos">
+      <label>Video URL or embed code</label>
+      <input type="text" id="videoUrlInput" placeholder="https://vimeo.com/... or https://youtube.com/watch?v=..." />
+      <label>Title (optional)</label>
+      <input type="text" id="videoTitleInput" placeholder="Title" />
+      <button class="btn primary" id="addVideoBtn">Add video</button>
+      <p class="hint">Paste a Vimeo or YouTube link, or a full <code>&lt;iframe&gt;</code> embed code. CodersHub will work out how to play it.</p>
+      <div class="admin-list" id="adminVideoList"></div>
+    </div>
+
+    <div class="apanel" id="a-pictures">
+      <label>Image URL(s)</label>
+      <textarea id="pictureUrlsInput" rows="4" placeholder="One URL per line, or comma-separated for several at once"></textarea>
+      <label>Caption (optional, applied to all)</label>
+      <input type="text" id="pictureCaptionInput" placeholder="Caption" />
+      <button class="btn primary" id="addPicturesBtn">Add pictures</button>
+      <div class="admin-list" id="adminPictureList"></div>
+    </div>
+
+    <div class="apanel" id="a-blog">
+      <label>Title</label>
+      <input type="text" id="blogTitleInput" placeholder="Post title" />
+      <label>Body</label>
+      <textarea id="blogBodyInput" rows="8" placeholder="Write your post..."></textarea>
+      <button class="btn primary" id="addBlogBtn">Publish</button>
+      <div class="admin-list" id="adminBlogList"></div>
+    </div>
+
+    <div class="apanel" id="a-links">
+      <label>Website URL</label>
+      <input type="url" id="linkUrlInput" placeholder="https://example.com" />
+      <label>Title (optional)</label>
+      <input type="text" id="linkTitleInput" placeholder="Website name" />
+      <label>Description (optional)</label>
+      <textarea id="linkDescriptionInput" rows="3" placeholder="What is worth visiting here?"></textarea>
+      <button class="btn primary" id="addLinkBtn">Add website</button>
+      <div class="admin-list" id="adminLinkList"></div>
+    </div>
+
+    <p class="error" id="adminError"></p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
