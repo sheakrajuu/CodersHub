@@ -1,0 +1,14 @@
+{
+  "pictures": [],
+  "videos": [],
+  "blogs": [
+    {
+      "id": "e9f3f41516c2",
+      "title": "Hello",
+      "body": "World",
+      "addedAt": 1788846856305
+    }
+  ],
+  "links": [],
+  "mangas": []
+}
