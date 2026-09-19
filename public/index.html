@@ -6,6 +6,8 @@
 <title>CodersHub | Your corner of the web</title>
 <link rel="icon" href="/icons/codershub.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icons/codershub.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#ffd34e">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
@@ -27,6 +29,7 @@
   <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-label="Open menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
+  <button class="install-button" id="installAppButton" type="button" hidden>Install app</button>
   <button class="search-button" id="searchButton" title="Search" aria-label="Search">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
   </button>
@@ -40,14 +43,14 @@
   <section class="panel active" id="panel-discover">
     <div class="discover-intro">
       <div class="hero-copy">
-        <p class="eyebrow">Welcome to your personal internet</p>
-        <h1>Make. Explore.<br><em>Keep learning.</em></h1>
-        <p>Experiences, web finds, videos, and notes for the curious mind.</p>
-        <div class="hero-actions"><button class="btn primary" data-discover-tab="videos">Explore the hub <span aria-hidden="true">&#8594;</span></button><button class="btn hero-link" data-discover-tab="blog">Read the notes</button></div>
+        <p class="eyebrow">Your private learning workspace</p>
+        <h1>Learn deeply.<br><em>Build often.</em></h1>
+        <p>A calm place for what I learn, what I make, and the references I want to keep.</p>
+        <div class="hero-actions"><button class="btn primary" data-discover-tab="blog">Open my notes <span aria-hidden="true">&#8594;</span></button><button class="btn hero-link" data-discover-tab="videos">Review videos</button></div>
       </div>
       <div class="hero-console" aria-label="CodersHub activity preview">
-        <div class="console-top"><span></span><span></span><span></span><b>codershub.log</b></div>
-        <div class="console-body"><p><i>&gt;</i> loading curiosity...</p><p><i>&gt;</i> <strong>ideas found: 0042</strong></p><p><i>&gt;</i> next quest: <em>build something</em></p><div class="console-cursor"></div></div>
+        <div class="console-top"><span></span><span></span><span></span><b>codershub.workspace</b></div>
+        <div class="console-body"><p><i>&gt;</i> workspace ready</p><p><i>&gt;</i> <strong>notes saved: local</strong></p><p><i>&gt;</i> next focus: <em>ship one thing</em></p><div class="console-cursor"></div></div>
       </div>
     </div>
     <div class="hub-stats" aria-label="Collection summary"><div><strong id="statVideos">0</strong><span>videos</span></div><div><strong id="statPictures">0</strong><span>visuals</span></div><div><strong id="statJournals">0</strong><span>notes</span></div><div><strong id="statLinks">0</strong><span>web finds</span></div></div>

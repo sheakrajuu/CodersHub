@@ -6,6 +6,7 @@ const $$ = sel => document.querySelectorAll(sel);
 const validSections = ['discover', 'videos', 'pictures', 'blog', 'websites'];
 let activeSection = 'discover';
 const mobileMenuButton = $('#mobileMenuButton');
+let installPrompt = null;
 
 function toast(msg){
   const t = $('#toast');
@@ -49,6 +50,24 @@ mobileMenuButton.addEventListener('click', () => {
   const isOpen = $('#mainTabs').classList.toggle('mobile-open');
   mobileMenuButton.setAttribute('aria-expanded', String(isOpen));
   mobileMenuButton.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+});
+
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  installPrompt = event;
+  $('#installAppButton').hidden = false;
+});
+$('#installAppButton').addEventListener('click', async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  await installPrompt.userChoice;
+  installPrompt = null;
+  $('#installAppButton').hidden = true;
+});
+window.addEventListener('appinstalled', () => {
+  installPrompt = null;
+  $('#installAppButton').hidden = true;
+  toast('CodersHub installed');
 });
 
 // ---------- load + render public content ----------
@@ -311,7 +330,9 @@ window.addEventListener('popstate', event => {
   }
 });
 
-history.replaceState({ section: 'discover' }, '', location.hash || '#discover');
+const initialSection = (location.hash.slice(1).split('/')[0] || 'discover');
+history.replaceState({ section: validSections.includes(initialSection) ? initialSection : 'discover' }, '', location.hash || '#discover');
+showSection(validSections.includes(initialSection) ? initialSection : 'discover', false);
 
 // ---------- lightbox / reader close ----------
 $('#lightboxClose').addEventListener('click', ()=> $('#lightbox').classList.remove('show'));
@@ -446,3 +467,7 @@ function rowHtml(id, label, type){
 }
 
 loadContent();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
