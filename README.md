@@ -31,20 +31,20 @@ and the latest public content response are cached so the workspace can reopen wh
 
 ## How content storage works
 
-Content (pictures, videos, blog posts, links) is stored in `data/content.json` on the server —
+Content (pictures, videos, blog posts, links, and playlists) is stored in `data/content.json` on the server —
 not in the visitor's browser — so everything you add in the admin panel is visible to every visitor.
+Every save first creates `data/content.backup.json`, and the Security tab can export or restore a complete JSON backup.
 
 One thing to know about Render's **free** tier: its disk is not persistent across deploys/restarts,
-so `data/content.json` can reset when the service restarts. If you want content to survive restarts:
-- Upgrade to a Render plan with a persistent disk and mount it at `/data`, then point `DATA_FILE`
-  at that path (small code change in `server.js`), **or**
-- Swap the JSON file for a real database later (Render's free Postgres works well) — ask me if you
-  want that done.
+so `data/content.json` can reset when the service restarts. Set `CONTENT_DATA_DIR` to the mount path of
+a persistent Render disk, or use a database for free-tier durability. The default remains the local `data`
+folder for simple hosting and local development.
 
 ## Adding content
 
 - **Embed video**: paste a Vimeo or YouTube link (or a full `<iframe>` embed code) — CodersHub figures out
   how to play it.
+- **Playlists**: select saved videos, drag them into order, and publish a named learning path.
 - **Add pictures**: paste one image URL, or several separated by new lines or commas, to add them all
   at once.
 - **Write post**: title + body, published immediately.
@@ -54,5 +54,5 @@ so `data/content.json` can reset when the service restarts. If you want content 
 
 ## Admin access
 
-There's a single admin login — no visitor accounts, since only you manage content. Change the password any
-time from the Security tab in the admin panel.
+There's a single admin login — no visitor accounts, since only you manage content. Sessions expire after 12
+hours and repeated failed sign-ins are throttled. Change the password or manage backups from the Security tab.

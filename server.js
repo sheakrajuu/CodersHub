@@ -5,25 +5,31 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATA_FILE = path.join(__dirname, 'data', 'content.json');
+const DATA_DIR = process.env.CONTENT_DATA_DIR || path.join(__dirname, 'data');
+const DATA_FILE = path.join(DATA_DIR, 'content.json');
+const BACKUP_FILE = path.join(DATA_DIR, 'content.backup.json');
 const AUTH_FILE = path.join(__dirname, 'data', 'admin-auth.json');
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY || '';
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
 
 app.use(express.json({ limit: '12mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+fs.mkdirSync(DATA_DIR, { recursive: true });
 
 // ---------- storage helpers ----------
 function loadData() {
   try {
     const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-    return { pictures: [], videos: [], blogs: [], links: [], mangas: [], ...data };
+    return { pictures: [], videos: [], blogs: [], links: [], mangas: [], playlists: [], ...data };
   } catch (e) {
-    return { pictures: [], videos: [], blogs: [], links: [], mangas: [] };
+    return { pictures: [], videos: [], blogs: [], links: [], mangas: [], playlists: [] };
   }
 }
 function saveData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  const temporaryFile = `${DATA_FILE}.tmp`;
+  if (fs.existsSync(DATA_FILE)) fs.copyFileSync(DATA_FILE, BACKUP_FILE);
+  fs.writeFileSync(temporaryFile, JSON.stringify(data, null, 2));
+  fs.renameSync(temporaryFile, DATA_FILE);
 }
 function id() {
   return crypto.randomBytes(6).toString('hex');
@@ -83,20 +89,33 @@ try {
 }
 
 // ---------- admin auth (single-user, token in memory) ----------
-const sessions = new Set();
+const sessions = new Map();
+const loginAttempts = new Map();
 function requireAdmin(req, res, next) {
   const token = req.headers['x-admin-token'];
-  if (token && sessions.has(token)) return next();
+  const expiresAt = token && sessions.get(token);
+  if (expiresAt && expiresAt > Date.now()) {
+    sessions.set(token, Date.now() + 12 * 60 * 60 * 1000);
+    return next();
+  }
+  if (token) sessions.delete(token);
   return res.status(401).json({ error: 'Not authorized. Please log in again.' });
 }
 
 app.post('/api/admin/login', (req, res) => {
   const { password } = req.body || {};
+  const address = req.ip || 'unknown';
+  const attempt = loginAttempts.get(address) || { count: 0, resetAt: Date.now() + 15 * 60 * 1000 };
+  if (attempt.resetAt < Date.now()) { attempt.count = 0; attempt.resetAt = Date.now() + 15 * 60 * 1000; }
+  if (attempt.count >= 5) return res.status(429).json({ error: 'Too many sign-in attempts. Try again later.' });
   if (typeof password === 'string' && passwordMatches(password, adminAuth)) {
     const token = crypto.randomBytes(24).toString('hex');
-    sessions.add(token);
+    sessions.set(token, Date.now() + 12 * 60 * 60 * 1000);
+    loginAttempts.delete(address);
     return res.json({ token });
   }
+  attempt.count += 1;
+  loginAttempts.set(address, attempt);
   return res.status(401).json({ error: 'Wrong password.' });
 });
 
@@ -124,6 +143,27 @@ app.post('/api/admin/logout', requireAdmin, (req, res) => {
 // ---------- public read ----------
 app.get('/api/content', (req, res) => {
   res.json(loadData());
+});
+
+app.get('/api/admin/export', requireAdmin, (req, res) => {
+  res.setHeader('Content-Disposition', 'attachment; filename="codershub-content.json"');
+  res.json(loadData());
+});
+
+app.post('/api/admin/import', requireAdmin, (req, res) => {
+  const imported = req.body || {};
+  const data = loadData();
+  const collections = ['pictures', 'videos', 'blogs', 'links', 'mangas', 'playlists'];
+  if (!collections.every(collection => Array.isArray(imported[collection]))) {
+    return res.status(400).json({ error: 'Backup must include all content collections as arrays.' });
+  }
+  const validVideoIds = new Set(imported.videos.map(video => video.id));
+  imported.playlists = imported.playlists.map(playlist => ({
+    ...playlist,
+    videoIds: Array.isArray(playlist.videoIds) ? playlist.videoIds.filter(videoId => validVideoIds.has(videoId)) : []
+  }));
+  saveData({ ...data, ...imported });
+  res.json({ ok: true, content: loadData() });
 });
 
 // ---------- video embed helper ----------
@@ -183,6 +223,87 @@ app.post('/api/admin/videos', requireAdmin, (req, res) => {
 app.delete('/api/admin/videos/:id', requireAdmin, (req, res) => {
   const data = loadData();
   data.videos = data.videos.filter(v => v.id !== req.params.id);
+  saveData(data);
+  res.json({ ok: true });
+});
+
+// ---------- playlists and editing ----------
+const editableCollections = {
+  pictures: 'pictures',
+  videos: 'videos',
+  blogs: 'blogs',
+  links: 'links'
+};
+
+function normalizeVideoIds(videoIds, data) {
+  if (!Array.isArray(videoIds)) return null;
+  const knownIds = new Set(data.videos.map(video => video.id));
+  const uniqueIds = [...new Set(videoIds.map(value => String(value)))];
+  return uniqueIds.filter(videoId => knownIds.has(videoId));
+}
+
+app.patch('/api/admin/:collection/:id', requireAdmin, (req, res) => {
+  const collection = editableCollections[req.params.collection];
+  if (!collection) return res.status(404).json({ error: 'That collection cannot be edited.' });
+  const data = loadData();
+  const item = data[collection].find(entry => entry.id === req.params.id);
+  if (!item) return res.status(404).json({ error: 'Item not found.' });
+  const updates = req.body || {};
+  const allowedFields = collection === 'videos'
+    ? ['title', 'embed']
+    : collection === 'pictures'
+      ? ['caption', 'url', 'images']
+      : collection === 'blogs'
+        ? ['title', 'body', 'images']
+        : ['url', 'title', 'description'];
+  allowedFields.forEach(field => {
+    if (!Object.prototype.hasOwnProperty.call(updates, field)) return;
+    item[field] = collection === 'videos' && field === 'embed' ? toEmbed(String(updates[field])) : updates[field];
+  });
+  item.updatedAt = Date.now();
+  saveData(data);
+  res.json({ updated: item });
+});
+
+app.post('/api/admin/playlists', requireAdmin, (req, res) => {
+  const { title, description, videoIds } = req.body || {};
+  if (!title || !String(title).trim()) return res.status(400).json({ error: 'A playlist needs a title.' });
+  const data = loadData();
+  const normalizedVideoIds = normalizeVideoIds(videoIds, data);
+  if (!normalizedVideoIds || !normalizedVideoIds.length) return res.status(400).json({ error: 'Choose at least one video.' });
+  const playlist = {
+    id: id(),
+    title: String(title).trim(),
+    description: String(description || '').trim(),
+    videoIds: normalizedVideoIds,
+    addedAt: Date.now()
+  };
+  data.playlists.unshift(playlist);
+  saveData(data);
+  res.json({ added: playlist });
+});
+
+app.patch('/api/admin/playlists/:id', requireAdmin, (req, res) => {
+  const data = loadData();
+  const playlist = data.playlists.find(entry => entry.id === req.params.id);
+  if (!playlist) return res.status(404).json({ error: 'Playlist not found.' });
+  const { title, description, videoIds } = req.body || {};
+  if (title !== undefined && !String(title).trim()) return res.status(400).json({ error: 'A playlist needs a title.' });
+  if (title !== undefined) playlist.title = String(title).trim();
+  if (description !== undefined) playlist.description = String(description).trim();
+  if (videoIds !== undefined) {
+    const normalizedVideoIds = normalizeVideoIds(videoIds, data);
+    if (!normalizedVideoIds.length) return res.status(400).json({ error: 'Choose at least one video.' });
+    playlist.videoIds = normalizedVideoIds;
+  }
+  playlist.updatedAt = Date.now();
+  saveData(data);
+  res.json({ updated: playlist });
+});
+
+app.delete('/api/admin/playlists/:id', requireAdmin, (req, res) => {
+  const data = loadData();
+  data.playlists = data.playlists.filter(playlist => playlist.id !== req.params.id);
   saveData(data);
   res.json({ ok: true });
 });
