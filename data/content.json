@@ -4,9 +4,9 @@
   "blogs": [
     {
       "id": "e9f3f41516c2",
-      "title": "Hello",
-      "body": "World",
-      "addedAt": 1788846856305
+      "title": "Hello everyone. Welcome to CodersHub.",
+      "body": "This is the first note in CodersHub, a growing corner of the web for builders, learners, and curious minds.\n\nI created this space to collect the things that help me move forward: experiments that teach me something new, websites worth returning to, videos that explain difficult ideas clearly, and small lessons from the projects I am working on.\n\nThere is no pressure to have everything figured out here. Good engineering is built one question, one useful tool, and one thoughtful improvement at a time. Some notes will be practical. Some will be personal. Some may simply be a reminder that progress is still progress, even when the code does not work on the first try.\n\nI hope CodersHub becomes a useful place to return to, contribute to, and build from. Welcome in. Let us keep learning, making, and sharing what we find.",
+      "addedAt": 1789776000000
     }
   ],
   "links": [],
