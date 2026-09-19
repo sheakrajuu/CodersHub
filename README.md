@@ -9,7 +9,13 @@ npm install
 ADMIN_PASSWORD=yourpassword npm start
 ```
 
-Then open http://localhost:3000. Click the gear-like icon in the top right to sign in as admin.
+Then open http://localhost:3000. Use **Manage hub** in the footer to sign in as admin.
+
+## Installing as an app
+
+CodersHub is a progressive web app. Open it in a supported browser and choose **Install app** when the
+install button appears. On iPhone or iPad, use the browser's **Add to Home Screen** action. The app shell
+and the latest public content response are cached so the workspace can reopen when temporarily offline.
 
 ## Deploying on Render
 
